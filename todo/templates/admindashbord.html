@@ -130,18 +130,22 @@ tfoot td {
         <p>You can add any task</p>
         <form class="row row-cols-lg-auto g-3 justify-content-center align-items-center mb-4 pb-2">
             <div class="col-12">
-                <div>
-                    <button class="btn btn-primary  btn-lg px-3 mb-0 gradient-custom" type="submit" style="margin-left: 307%;"><a href="{% url 'logout' %}" style="color: white;">Logout</a></button>
-                </div>
-            </div>
+        </div>
+
         </form>
+        <form action=>
+                <button class="btn btn-primary  btn-lg px-3 mb-0 gradient-custom" type="submit" style="margin-left: 307%;"><a style="color: blue;">Logout</a></button>
+        </form>
+
         <table class="table mb-4">
+                
             <thead>
                 <tr>
                     <th> No.</th>
                     <th> User name</th>
                     <th> Email</th>
                     <th> Actions</th>
+                    
                 </tr>
             </thead>
             <tbody>
@@ -156,6 +160,7 @@ tfoot td {
                 </tr>
                 {% endfor %}
             </tbody>
+            
         </table>
     </div>
 </body>

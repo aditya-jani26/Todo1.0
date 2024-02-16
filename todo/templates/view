@@ -1,0 +1,58 @@
+
+
+# # Home view
+# def home(request):
+#     return render(request, 'home.html')
+
+# # Login view
+# def login(request):
+#     if request.method == 'POST':
+#         email = request.POST.get('email')
+#         password = request.POST.get('password')
+#         user = authenticate(email=email, password=password)
+#         if user:
+#             auth_login(request, user)
+#             return redirect('todo')
+#         else:
+#             return HttpResponse("Invalid email or password.")
+#     return render(request, 'login.html')
+
+# # Registration view
+# def registration(request):
+#     if request.method == 'POST':
+#         name = request.POST.get('name')
+#         email = request.POST.get('email')
+#         password = request.POST.get('password')
+#         new_person = Person.objects.create(name=name, email=email)
+#         new_person.set_password(password)
+#         new_person.save()
+#         return redirect("login")
+#     return render(request, 'registration.html')
+
+# # Todo view
+# @login_required
+# def todo(request):
+#     tasks = Todo.objects.all()
+#     return render(request, 'todo.html', {'tasks': tasks})
+
+# # Add task view
+# @login_required
+# def add(request):
+#     if request.method == 'POST':
+#         title = request.POST.get('title')
+#         description = request.POST.get('description')
+#         new_todo = Todo.objects.create(title=title, description=description)
+#         return redirect('todo')
+#     return render(request, 'todo.html')
+
+# # Delete task view
+# @login_required
+# def delete(request, id):
+#     Todo.objects.filter(id=id).delete()
+#     return redirect('todo')
+
+# # Logout view
+# @login_required
+# def logout(request):
+#     logout(request)
+#     return redirect('login')
