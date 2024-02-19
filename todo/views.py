@@ -22,7 +22,7 @@ def login(request):
             # user = request.user
 
             user = user = User.objects.get(username = "admin")
-            print(user)
+            # print(user)
 
             if Person.objects.filter(email=email, password=password).exists():  
                 request.session['email'] = email
@@ -53,8 +53,14 @@ def registration(request):
 # ==============================todo===================================
 
 def todo(request):
-    addtask = Todo.objects.all()
-    return render(request,'todo.html',{'addtask':addtask})
+    user_email = request.session.get('email')
+    if user_email:
+        user_instance = get_object_or_404(Person, email=user_email)
+        addtask = Todo.objects.filter(user_id=user_instance.id) 
+        return render(request,'todo.html',{'addtask':addtask})    
+    else:
+        return redirect('login')
+
 # ------------------------------add----------------------------------
 
 @login_required
@@ -69,7 +75,7 @@ def add(request):
  
         new_todo = Todo.objects.create(user_id=logedinUser, date=date, title=title, description=description)
         new_todo.save()
-        print("Title from frontend", title)
+        print("Title from frontend", logedinUser)
         return redirect('todo')
     return render(request,'todo.html')
 # -----------------------------completed-----------------------------------
