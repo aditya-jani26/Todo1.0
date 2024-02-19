@@ -107,7 +107,7 @@ def delete(request,id):
 # This is used for admin dashboard only (see this on admindashbors.Html)
 def display(request,id):
     
-    todo=Todo.objects.filter(user_id_=id)
+    todo=Todo.objects.filter(user_id=id)
     # print("Display", sum(todo.id for t in todo))
     return render(request,'display.html',{'todo':Todo})
 # --------------------------------adminDash--------------------------------
