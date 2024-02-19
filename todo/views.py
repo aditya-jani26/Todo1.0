@@ -108,8 +108,9 @@ def delete(request,id):
 def display(request,id):
     
     todo=Todo.objects.filter(user_id=id)
-    # print("Display", sum(todo.id for t in todo))
-    return render(request,'display.html',{'todo':Todo})
+
+    return render(request,'display.html',{'todo':todo})
+# this Dispaly. Html file j 
 # --------------------------------adminDash--------------------------------
 # This is used for Showing all user information and task
 def adminDash(request):
