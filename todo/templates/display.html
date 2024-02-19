@@ -43,7 +43,14 @@
                                         <td>{{ i.date }}</td>
                                         <td>{{ i.title }}</td>
                                         <td>{{ i.description }}</td>
-                                        <td>{{ i.status }}</td>
+                                        <td>
+                                            {% if i.completed %}
+                                            <span class="badge badge-success">Completed</span>
+                                            {% else %}
+                                            <span class="badge badge-danger" >in progress</span>
+                                            {% endif %}
+                                            
+                                        </td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
