@@ -38,11 +38,15 @@ def login(request):
 # this is when new user come for the first time can want to register and create a new account
 def registration(request):
     if request.method == 'POST':
+
         name = request.POST.get('name')
         email = request.POST.get('email')
         password = request.POST.get('password')
+
         newPerson = Person(name=name, email=email, password=password)
         newPerson.save()
+
+        request.session['email'] = email
         return redirect("login")
     return render(request,'registration.html')
 
