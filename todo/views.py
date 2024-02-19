@@ -81,17 +81,14 @@ def add(request):
 # -----------------------------completed-----------------------------------
 # here the default value is false
 
-def completed(request,id):
+def finished(request,id):
     todo = Todo.objects.get(id=id)
+    todo.completed =True
 
-
-    if todo.completed == True:
-        todo.status = "completed"
-
-    Todo.objects.filter(status=todo.status)
+    todo.status = "completed"
     todo.save()
 
-    return redirect('home')
+    return redirect('todo')
 
 # -----------------------------logoutuser-----------------------------------
 # the cookies will be deleted with
