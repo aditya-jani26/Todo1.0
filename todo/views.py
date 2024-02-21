@@ -75,7 +75,7 @@ def add(request):
  
         new_todo = Todo.objects.create(user_id=logedinUser, date=date, title=title, description=description)
         new_todo.save()
-        print("Title from frontend", logedinUser)
+        # print("Title from frontend", logedinUser)
         return redirect('todo')
     return render(request,'todo.html')
 # -----------------------------completed-----------------------------------
