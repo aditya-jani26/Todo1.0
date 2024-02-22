@@ -3,11 +3,11 @@ from django.shortcuts import render,redirect,get_object_or_404
 from django.http import HttpResponse
 from .models import Person,Todo
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.hashers import check_password 
+from django.contrib.auth.hashers import check_password,make_password
 from django.contrib.auth.models import User
 # ============================home=====================================
 # This is basic page which you can see link
-@login_required
+
 def home(request):
     return render(request,'home.html')
 
@@ -46,12 +46,11 @@ def registration(request):
         newPerson = Person(name=name, email=email, password=password)
         newPerson.save()
 
-        request.session['email'] = email
         return redirect("login")
     return render(request,'registration.html')
 
 # ==============================todo===================================
-
+@login_required
 def todo(request):
     user_email = request.session.get('email')
     if user_email:
@@ -94,8 +93,12 @@ def finished(request,id):
 # the cookies will be deleted with
 
 def logout(request):
-    del request.session['email']
-    return render(request, 'login.html')
+    try:
+        if request.method == 'GET':
+            del request.session['email']
+            return redirect('login')
+    except KeyError:
+        return redirect('login') 
 
 # ---------------------------delete-------------------------------------
 # this is used to delete the task from the database
@@ -116,8 +119,12 @@ def display(request,id):
 # this Dispaly. Html file j 
 # --------------------------------adminDash--------------------------------
 # This is used for Showing all user information and task
+@login_required
 def adminDash(request):
+    if request.session['email']:
+        users = Person.objects.all()
+        return render(request, 'admindashbord.html', {'users': users})
+    else:
+        return redirect('login')
 
-    users = Person.objects.all()
-    return render(request, 'admindashbord.html', {'users': users})
 # --------------------------------------000--------------------------------
