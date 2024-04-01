@@ -18,8 +18,7 @@ class Todo(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField(max_length=1000)
     completed = models.BooleanField(default=0)
-    # status = models.CharField(max_length=10, null=True, blank=True,default='In progress')
+    status = models.CharField(max_length=10, null=True, blank=True,default='In progress')
     
-
     def __str__(self):
         return str(self.title)

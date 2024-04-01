@@ -59,9 +59,7 @@
     
         <form action="{% url 'registration' %}" method="post">
                 {% csrf_token %}
-                <div>
-                    <button class="btn btn-primary  btn-lg px-3 mb-0 gradient-custom" type="submit" style="margin-left: 80%;"><a href="{% url 'login' %}" style="color: rgb(184, 25, 25);">back</a></button>
-                </div>
+
             <div class="form-group">
                 <label for="name">Name</label>
                 <input type="text" id="name" name="name" required>
@@ -78,6 +76,7 @@
             <div class="form-group">
                 <button type="submit">Sign Up<a href="login"></a></button>
             </div>
+            
         </form>
         <div class="login-link">
             <button type="button" class="registration"><a href="{% url 'login' %}">login</a></button>

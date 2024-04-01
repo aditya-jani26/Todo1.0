@@ -69,18 +69,18 @@
 </style>
 <body>
 	<div class="login-box">
-       
+       <p>{{msg}}</p>
 		<h1>Login</h1>
 		<form action="{% url 'login' %}" method="post">
             {% csrf_token %}
-            <div>
-                <button class="btn btn-primary  btn-lg px-3 mb-0 gradient-custom" type="submit" style="margin-left: 80%;"><a href="{% url 'registration' %}" style="color: rgb(184, 25, 25);">back</a></button>
-            </div>
-			<p>email</p>
-			<input type="text" name="email" placeholder="Enter Username">
+			<p>Email</p>
+			<input type="text" name="email" placeholder="Enter Email">
 			<p>Password</p>
 			<input type="password" name="password" placeholder="Enter Password" required>
 			<button type="submit" class="login"> <a href="{% url 'login' %}"></a>login</button>
+            <div>
+                <button class="btn btn-primary  btn-lg px-3 mb-0 gradient-custom" type="submit" style="margin-left: 30%;"><a href="{% url 'registration' %}" style="color: rgb(69, 192, 88);">registration</a></button>
+            </div>
             <!-- <button type="submit" class="registration"> <a href="{% url 'registration' %}"></a>Registration</button> -->
 		</form>
 	</div>
