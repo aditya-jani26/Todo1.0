@@ -134,7 +134,7 @@ tfoot td {
     <div class="container">
         <h1>To-Do App</h1>
         <p>You can add any task</p>
-        <form class="form" method="POST" action="{% url 'add' %}">
+        <form class="form" method="POST" action="{% url 'todo' %}">
             {% csrf_token %}
             <div>
                 <input type="text" name ='title'id="title" placeholder="Enter a title here" size="30" required>

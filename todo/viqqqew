@@ -1,144 +1,124 @@
 import datetime
-from django.shortcuts import render,redirect,get_object_or_404
-from django.http import HttpResponse
-from .models import Person,Todo
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.hashers import check_password,make_password
+from urllib import response
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from django.views import View
+from rest_framework import status
+from django.contrib.auth import authenticate
 
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from .serializers import ToDoSerializer
+from todo.serializers import LoginSerializer
+from .models import Person, Todo
 
-# ============================home=====================================
-# This is basic page which you can see link
 
-def home(request):
-    return render(request,'home.html')
+class HomeView(View):
+    def get(self, request):
+        return render(request, 'home.html')
 
-# ------------------------------login----------------------------------
-# this is login function in this we have used session to login 
-def login(request):
 
-        if request.method == 'POST':
-            email = request.POST.get('email')
-            password = request.POST.get('password')
-            
-            Enc_passworrd = make_password(password)
-            # user = request.user
-
-            user = user = User.objects.get(username = "admin")
-            # print(user)
-
-            if Person.objects.filter(email=email).exists() and check_password(password, Enc_passworrd):  
-                request.session['email'] = email
-                return redirect('todo')
-            
-            elif User.objects.filter(email=user.email).exists() and check_password(password, user.password):
-                request.session['email'] = email
-                return redirect('admindash')
-            
-            else:
-                msg = 'Errors:Email  or password not is invalid' 
-                return render(request,"login.html",{"msg":msg})
+class LoginView(View):
+    def get(self, request):
         return render(request, 'login.html')
-            # else: 
-            #     msg = 'Errors:password not found ' 
-            #     return render(request,"login.html",{"msg":msg})
-        
 
+    def post(self, request):
+        user_email = request.session.get('email')
+        try:
+            serializer = LoginSerializer(data=request.POST)
+            if serializer.is_valid():  
+                email = serializer.validated_data.get('email')
+                password = serializer.validated_data.get('password')
+                if Person.objects.filter(email=email).exists() and check_password(password, password):
+                    request.session['email'] = email
+                    return redirect('todo')
+                elif User.objects.filter(email=User.email).exists() and check_password(password, User.password):
+                    request.session['email'] = email
+                    return redirect('admindash')
+                else:
+                    msg = 'Errors: Email or password is invalid'
+                    return render(request, "login.html", {"msg": msg})
+            else:
+                return response({
+                    'status': 400,
+                    'message': 'Something went wrong',
+                    'data': serializer.errors,
+                })
+        except Exception as e:
+            print(e)
+class RegistrationView(View):
+    def get(self, request):
+        return render(request, 'registration.html')
 
-
-# ---------------------------registration-------------------------------------
-# this is when new user come for the first time can want to register and create a new account
-def registration(request):
-    if request.method == 'POST':
-
+    def post(self, request):
         name = request.POST.get('name')
         email = request.POST.get('email')
         Enc_email = make_password(email)
         password = request.POST.get('password')
-        Enc_passworrd = make_password(password)
-        newPerson = Person.objects.create(name=name, email=Enc_email, password=Enc_passworrd)
-        newPerson.save()
-
+        Enc_password = make_password(password)
+        new_person = Person.objects.create(name=name, email=Enc_email, password=Enc_password)
+        new_person.save()
         return redirect("login")
-    return render(request,'registration.html')
-
-# ==============================todo===================================
-
-def todo(request):
-    user_email = request.session.get('email')
-    if user_email:
-        user_instance = get_object_or_404(Person, email=user_email)
-        addtask = Todo.objects.filter(user_id=user_instance.id) 
-        return render(request,'todo.html',{'addtask':addtask})    
-    else:
-        return redirect('login')
-
-# ------------------------------add----------------------------------
 
 
-def add(request):
-    if request.method == 'POST':
-        date = datetime.date.today()
-        title = request.POST.get('title')
-        description = request.POST.get('description')
-        obj= Person.objects.get(email=request.session['email'])
-        logedinUser = get_object_or_404(Person,id=obj.id)
- 
-        new_todo = Todo.objects.create(user_id=logedinUser, date=date, title=title, description=description)
-        new_todo.save()
-        # print("Title from frontend", logedinUser)
+class TodoView(View):
+    def get(self, request):
+        user_email = request.session.get('email')
+        if user_email:
+            user_instance = get_object_or_404(Person, email=user_email)
+            addtask = Todo.objects.filter(user_id=user_instance.id)
+            return render(request, 'todo.html', {'addtask': addtask})
+        else:
+            return redirect('login')
+
+    def post(self, request):
+        if request.method == 'POST':
+            date = datetime.date.today()
+            title = request.POST.get('title')
+            description = request.POST.get('description')
+            obj = Person.objects.get(email=request.session['email'])
+            logedinUser = get_object_or_404(Person, id=obj.id)
+            new_todo = Todo.objects.create(user_id=logedinUser, date=date, title=title, description=description)
+            new_todo.save()
+            return redirect('todo')
+
+
+class FinishedView(View):
+    def get(self, request, id):
+        todo = Todo.objects.get(id=id)
+        todo.completed = True
+        todo.status = "completed"
+        todo.save()
         return redirect('todo')
-    return render(request,'todo.html')
-# -----------------------------completed-----------------------------------
-# here the default value is false
 
-def finished(id):
-    todo = Todo.objects.get(id=id)
-    todo.completed =True
 
-    todo.status = "completed"
-    todo.save()
-
-    return redirect('todo')
-
-# -----------------------------logoutuser-----------------------------------
-# the cookies will be deleted with
-
-def logout(request):
-    del request.session['email']
-    return redirect('login')
-# ---------------------------delete-------------------------------------
-# this is used to delete the task from the database
-
-def delete(id):
-    todo = Todo.objects.get(id=id)
-    todo.delete()
-    return redirect('todo')
-
-# -----------------------------display-----------------------------------
-@login_required
-# This is used for admin dashboard only (see this on admindashbors.Html)
-def display(request,id):
-    user_email = request.session.get('email')
-    if user_email:
-        todo=Todo.objects.filter(user_id=id)
-        return render(request,'display.html',{'todo':todo})
-    else:
-        return redirect('login')
-   
-# this Dispaly. Html file j 
-# --------------------------------adminDash--------------------------------
-# This is used for Showing all user information and task
-def admindash(request):
-    if request.session['email']:
-        users = Person.objects.all()
-        return render(request, 'admindashbord.html', {'users': users})
-    else:
+class LogoutView(View):
+    def get(self, request):
+        del request.session['email']
         return redirect('login')
 
-# --------------------------------------000--------------------------------
-    
+
+class DeleteView(View):
+    def get(self, request, id):
+        todo = Todo.objects.get(id=id)
+        todo.delete()
+        return redirect('todo')
+
+
+class DisplayView(View):
+    @login_required
+    def get(self, request, id):
+        user_email = request.session.get('email')
+        if user_email:
+            todo = Todo.objects.filter(user_id=id)
+            return render(request, 'display.html', {'todo': todo})
+        else:
+            return redirect('login')
+
+
+class AdminDashView(View):
+    def get(self, request):
+        if request.session['email']:
+            users = Person.objects.all()
+            return render(request, 'admindashbord.html', {'users': users})
+        else:
+            return redirect('login')
