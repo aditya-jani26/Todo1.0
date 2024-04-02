@@ -10,3 +10,10 @@ class ToDoSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
     password = serializers.CharField()
+
+    class Meta:
+        model = Todo
+        fields = ('email','password')
+
+class LogoutSerializer(serializers.Serializer):
+    pass

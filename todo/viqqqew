@@ -1,16 +1,16 @@
 import datetime
-from urllib import response
+from rest_framework.response import Response
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.views import View
-from rest_framework import status
-from django.contrib.auth import authenticate
-
+# from rest_framework import status
+# # from django.contrib.auth import authenticate
+from .serializers import *
 from todo.serializers import LoginSerializer
 from .models import Person, Todo
-
+from rest_framework.views import APIView
 
 class HomeView(View):
     def get(self, request):
@@ -18,33 +18,42 @@ class HomeView(View):
 
 
 class LoginView(View):
+    @APIView(['GET'])
     def get(self, request):
         return render(request, 'login.html')
-
+    @APIView(['POST'])
     def post(self, request):
-        user_email = request.session.get('email')
-        try:
-            serializer = LoginSerializer(data=request.POST)
-            if serializer.is_valid():  
-                email = serializer.validated_data.get('email')
-                password = serializer.validated_data.get('password')
-                if Person.objects.filter(email=email).exists() and check_password(password, password):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data.get('email')
+            password = serializer.validated_data.get('password')
+
+            try:
+                person = Person.objects.get(email=email)
+                if check_password(password, person.password):
                     request.session['email'] = email
                     return redirect('todo')
-                elif User.objects.filter(email=User.email).exists() and check_password(password, User.password):
+            except Person.DoesNotExist:
+                pass
+
+            try:
+                user = User.objects.get(email=email)
+                if check_password(password, user.password):
                     request.session['email'] = email
-                    return redirect('admindash')
-                else:
-                    msg = 'Errors: Email or password is invalid'
-                    return render(request, "login.html", {"msg": msg})
-            else:
-                return response({
-                    'status': 400,
-                    'message': 'Something went wrong',
-                    'data': serializer.errors,
-                })
-        except Exception as e:
-            print(e)
+                    return redirect('admindash') 
+            except User.DoesNotExist:
+                pass
+
+            msg = 'Errors: Email or password is invalid'
+            return render(request, "login.html", {"msg": msg})
+
+        return Response({
+            'status': 400,
+            'message': 'Something went wrong',
+            'data': serializer.errors
+        })
+
+
 class RegistrationView(View):
     def get(self, request):
         return render(request, 'registration.html')
@@ -122,3 +131,105 @@ class AdminDashView(View):
             return render(request, 'admindashbord.html', {'users': users})
         else:
             return redirect('login')
+
+
+
+# =================================================================
+import datetime
+from django.http import Http404
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from django.views import View
+from rest_framework.views import APIView
+from todo.serializers import LoginSerializer
+from .models import Person, Todo
+from rest_framework.response import Response
+
+class TodoView(View):
+    def get(self, request):
+        user_email = request.session.get('email')
+        if user_email:
+            user_instance = get_object_or_404(Person, email=user_email)
+            addtask = Todo.objects.filter(user_id=user_instance.id)
+            return render(request, 'todo.html', {'addtask': addtask})
+        else:
+            return redirect('login')
+
+    def post(self, request):
+        serializer = LoginSerializer(data=request.POST)
+        if serializer.is_valid():
+            email = serializer.validated_data.get('email')
+            password = serializer.validated_data.get('password')
+
+            try:
+                person = Person.objects.get(email=email)
+                if check_password(password, person.password):
+                    request.session['email'] = email
+                    date = datetime.date.today()
+                    title = request.POST.get('title')
+                    description = request.POST.get('description')
+                    logedinUser = get_object_or_404(Person, id=person.id)
+                    new_todo = Todo.objects.create(user_id=logedinUser, date=date, title=title, description=description)
+                    new_todo.save()
+                    return redirect('todo')
+            except Person.DoesNotExist:
+                pass
+
+            try:
+                user = User.objects.get(email=email)
+                if check_password(password, user.password):
+                    request.session['email'] = email
+                    return redirect('admindash') 
+            except User.DoesNotExist:
+                pass
+
+            msg = 'Errors: Email or password is invalid'
+            return render(request, "login.html", {"msg": msg})
+
+        return Response({
+            'status': 400,
+            'message': 'Something went wrong',
+            'data': serializer.errors
+        })
+class LoginView(APIView):
+    def get(self, request):
+        try:
+            return render(request, 'todo.html')
+        except LoginView.DoesNotExist:
+            raise Http404
+        
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data.get('email')
+            password = serializer.validated_data.get('password')
+
+            try:
+                person = Person.objects.get(email=email)
+                if check_password(password, person.password):
+                    request.session['email'] = email
+                return redirect('todo')
+            except Person.DoesNotExist:
+                pass
+
+            try:
+                user = User.objects.get(email=email)
+                if check_password(password, user.password):
+                    request.session['email'] = email
+                return redirect('admindash') 
+            except User.DoesNotExist:
+                pass
+
+            msg = 'Errors: Email or password is invalid'
+            return render(request, "login.html", {"msg": msg})
+
+        return Response({
+            'status': 400,
+            'message': 'Something went wrong',
+            'data': serializer.errors
+        })
+
+This is my code for loginview and it is working but only problem is that my todoviews is not modified with serializers and you can take 
+abve code reffance but do on thing do not change anmeing convation in my LoginView
