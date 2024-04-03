@@ -1,19 +1,16 @@
 # serializers.py
 from rest_framework import serializers
-from .models import Todo
+from .models import Todo , Person
+
+class LoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Person
+        fields = '__all__'
 
 class ToDoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Todo
-        fields = ['id','date' ,'title', 'description', 'completed']
-
-class LoginSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField()
-    password = serializers.CharField()
-
-    class Meta:
-        model = Todo
-        fields = ('email','password')
-
+        fields = '__all__'
+    
 class LogoutSerializer(serializers.Serializer):
     pass
